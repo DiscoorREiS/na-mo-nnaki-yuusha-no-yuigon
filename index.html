@@ -1,5 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>勇者の遺言と、綻びの空</title>
+    <style>
+        :root {
+            --base-bg: #0a0a0a;
+            --base-text: #e0e0e0;
+            --accent-color: #d4af37;
+            --saturation: 100%;
+        }
+        body {
+            background-color: var(--base-bg);
+            color: var(--base-text);
+            font-family: 'Sawarabi Mincho', serif;
+            margin: 0; padding: 0;
+            filter: saturate(var(--saturation));
+            transition: filter 2.0s ease-in-out;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; overflow: hidden;
+        }
+        #game-layout { display: flex; width: 95%; height: 90vh; max-width: 1200px; gap: 20px; }
+        #status-panel { flex: 1; background: rgba(15, 15, 15, 0.9); border: 1px solid #333; padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
+        #main-panel { flex: 3; display: flex; flex-direction: column; gap: 15px; }
+        #text-box { flex: 2; background: rgba(20, 20, 20, 0.95); border: 1px solid var(--accent-color); padding: 20px; font-size: 1.1rem; line-height: 1.8; overflow-y: auto; white-space: pre-wrap; }
+        #choices-container { flex: 1.2; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .choice-button { background: transparent; color: #ccc; border: 1px solid #555; padding: 12px; cursor: pointer; font-size: 0.9rem; text-align: left; transition: 0.2s; font-family: inherit; }
+        .choice-button:hover:not(:disabled) { border-color: var(--accent-color); background: rgba(212, 175, 55, 0.1); }
+        .choice-button:disabled { color: #444; border-color: #222; cursor: not-allowed; opacity: 0.3; }
+        .choice-button.special { border-color: #55a; color: #99f; }
+        .status-label { font-size: 0.7rem; color: var(--accent-color); font-weight: bold; }
+        .stat-value { font-size: 1.1rem; margin-top: 2px; }
+        .victim-list { font-size: 0.8rem; color: #a00; list-style: none; padding: 0; }
+        .victim-list li { margin-bottom: 3px; border-left: 2px solid #a00; padding-left: 5px; cursor: pointer; }
+        .victim-list li:hover { color: #ff6666; }
+        .victim-list li.read { color: #722; }
+        .flash { animation: flash-effect 0.5s ease-out; }
+        @keyframes flash-effect { 0% { background: #fff; } 100% { background: transparent; } }
+        .hidden-word { color: #f2e8d0; cursor: pointer; }
+        #despair-val { color: #c44; font-size: 1rem; }
+        .error-box { color: #ff4444; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; }
+    </style>
+</head>
+<body id="body-main">
+
+<div id="game-layout">
+    <div id="status-panel">
+        <div class="status-group"><div class="status-label">CURRENT REGION</div><div id="loc-val" class="stat-value">---</div></div>
+        <div class="status-group"><div class="status-label">PARTY STATUS</div><div id="party-val" class="stat-value">なし</div></div>
+        <hr style="border: 0; border-top: 1px solid #333;">
+        <div class="status-group">
+            <div class="status-label">WORLD HARMONY (色彩)</div>
+            <div id="sat-val" class="stat-value">100%</div>
+        </div>
+        <div class="status-group">
+            <div class="status-label">HERO LOGS (RECORDS)</div>
+            <div style="font-size: 0.8rem;">世界への貢献: <span id="rep-val">0</span></div>
+            <div style="font-size: 0.8rem;" id="sus-label-line">単眼鏡の同調: <span id="sus-val">0</span></div>
+        </div>
+        <div class="status-group" id="despair-group" style="display:none;">
+            <div class="status-label">DESPAIR（絶望）</div>
+            <div id="despair-val">---</div>
+        </div>
+        <hr style="border: 0; border-top: 1px solid #333;">
+        <div class="status-group">
+            <div class="status-label">LIFE SACRIFICED (犠牲者名簿)</div>
+            <ul id="victim-list" class="victim-list"></ul>
+        </div>
+    </div>
+    <div id="main-panel">
+        <div id="text-box">運命を構築中...</div>
+        <div id="choices-container"></div>
+    </div>
+</div>
+
+<!-- ===================================================================
+     ここから下がファイル分割部分。
+     直す必要が出たときは、該当するファイルだけを丸ごと差し替えればOK。
+     順番を変えると動かなくなるので、この並び順は変更しないこと。
+     =================================================================== -->
 <script src="data/system.js"></script>
 <script src="data/villages_1to3.js"></script>
 <script src="data/villages_4to6.js"></script>
 <script src="data/villages_7to9.js"></script>
 <script src="data/ending.js"></script>
+
+</body>
+</html>
