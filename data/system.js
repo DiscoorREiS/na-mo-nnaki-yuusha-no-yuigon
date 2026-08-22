@@ -2,9 +2,6 @@
  * ============================================================
  * system.js
  * ゲームの土台となるロジック（状態管理・UI更新・共通関数）
- * このファイルには「村ごとの物語データ」は一切含まれない。
- * 村の内容を直したいときはこのファイルではなく、
- * villages_1to3.js / villages_4to6.js / villages_7to9.js / ending.js を触ること。
  * ============================================================
  */
 
@@ -16,9 +13,6 @@ window.onerror = function(message, source, lineno, colno, error) {
     return false;
 };
 
-/**
- * ゲーム全体の状態。ここに現在の進行状況がすべて入る。
- */
 const gameState = {
     currentVillageIndex: 1,
     isFateLocked: false,
@@ -26,16 +20,16 @@ const gameState = {
     hasEverDestroyed: false,
     destroyCount: 0,
     repairedCount: 0,
-    doucho: 0,            // 単眼鏡ありのときだけ増える「同調」
-    totalDoucho: 0,        // 同上（累積・侵食テキストの判定用）
-    investigation: 0,       // 単眼鏡なしのときだけ増える「調査度」
+    doucho: 0,
+    totalDoucho: 0,
+    investigation: 0,
     worldSaturation: 100,
     companions: [],
     victims: [],
     villageHistory: [],
     hasFoundSecret: false,
     monocleAbandoned: false,
-    hasMonocle: false,      // プロローグで単眼鏡に触れたか
+    hasMonocle: false,
     firstDestructionVillage: null,
     despairType: null,
     decisionSpeedLog: [],
@@ -45,16 +39,11 @@ const gameState = {
     entryLevel: 'low'
 };
 
-/**
- * villageDataは各villages_*.jsファイルの中で
- * 「まだ存在しなければ作る、あれば追記する」形で組み立てられる。
- */
 if (typeof window.villageData === 'undefined') {
     window.villageData = {};
 }
 const villageData = window.villageData;
 
-// このゲームで現在実装済みの最終村番号。村を追加したら、その村のファイル側でこの値を上書きする。
 window.MAX_IMPLEMENTED_VILLAGE = window.MAX_IMPLEMENTED_VILLAGE || 0;
 
 function pickRandom(arr) {
@@ -85,7 +74,6 @@ function pickByEntryLevel(variants) {
     return "";
 }
 
-// 単眼鏡による特別な演出（侵食テキスト、村人の違和感への気づき等）が有効かどうか
 function isMonocleActive() {
     return gameState.hasMonocle && !gameState.monocleAbandoned;
 }
@@ -140,7 +128,6 @@ function getEncroachmentLevel() {
     return null;
 }
 
-// 単眼鏡を持たない場合、侵食テキストは一切発生しない
 function maybeGetEncroachmentText() {
     if (!isMonocleActive()) return null;
     const level = getEncroachmentLevel();
@@ -201,6 +188,9 @@ const fateLockDialogue = {
     }
 };
 
+/**
+ * 自決の描写：破壊ルート版（村番号ごとに生々しさが増す）
+ */
 const selfTerminationTextsByVillage = {
     7: "灰塚の焼け跡に、静かに身を横たえた。かつての戦の跡に、もう一つの跡が加わっただけだった。",
     8: "美しすぎる町の花壇のそばで、そっと膝をついた。整いすぎた景色が、最後にひどく歪んで見えた。",
@@ -208,9 +198,27 @@ const selfTerminationTextsByVillage = {
 };
 
 /**
- * UI更新（サイドパネル全体）
- * 単眼鏡の有無で「同調」と「調査度」の表示を切り替える。
+ * 自決の描写：修理ルート版（一度も破壊していない場合）
+ * 「壊した絶望」ではなく「見て見ぬふりを続けたことへの限界」というニュアンス
  */
+const selfTerminationTextsRepairOnly = {
+    7: "焼け跡の匂いが、これほど濃く漂っていても、まだ気づかないふりを続けようとしていた自分に、ふと嫌気が差した。",
+    8: "美しすぎる町の中で、ずっと何かを見ないようにしてきた。その息苦しさに、もう耐えられそうになかった。",
+    9: "空の異様さに、いくら目を逸らしても、もう限界だった。何も見なかったことにする力さえ、残っていなかった。"
+};
+
+/**
+ * 自決の選択肢を表示するかどうかの判定
+ * ・破壊経験あり：常に表示（村7〜9）
+ * ・破壊経験なし：同調が一定値（80）を超えている場合のみ表示
+ *   （何も気づいていない状態で絶望するのは不自然なため）
+ */
+function shouldShowSelfTermination(vIndex) {
+    if (getIntensityTier(vIndex) !== 'C') return false;
+    if (gameState.hasEverDestroyed) return true;
+    return gameState.doucho >= 80 || gameState.investigation >= 80;
+}
+
 function updateUI() {
     document.documentElement.style.setProperty('--saturation', `${gameState.worldSaturation}%`);
     document.getElementById('loc-val').innerText = villageData[gameState.currentVillageIndex]?.name || `第${gameState.currentVillageIndex}の地域`;
@@ -280,10 +288,6 @@ function attachSecretHandlers() {
     });
 }
 
-/**
- * 秘密（メモ・楽譜等）の発見処理。
- * 単眼鏡の有無に一切関係なく発見できる。
- */
 function revealSecret(secretId) {
     if (gameState.hasFoundSecret) return;
     gameState.hasFoundSecret = true;
@@ -358,11 +362,6 @@ function getRumorText(vIndex) {
     return pickRandom(pool)(prevName);
 }
 
-/**
- * トピックのテキスト決定。
- * ・秘密（メモ等）の発見は単眼鏡の有無に関係なく可能
- * ・withMonocleExtra（単眼鏡越しの追加描写）は単眼鏡所持時のみ
- */
 function getTopicText(topic, vIndex) {
     if (topic.isRumorTopic) {
         if (!topic.visited) {
@@ -391,7 +390,6 @@ function getTopicText(topic, vIndex) {
     const encroachment = maybeGetEncroachmentText();
     if (encroachment) return encroachment;
 
-    // 秘密の発見：単眼鏡の有無に関係なく可能
     if (topic.isSecretTopic && !gameState.hasFoundSecret && Math.random() < 0.45) {
         return topic.secretVariant;
     }
@@ -471,7 +469,7 @@ function renderBeacon(vIndex) {
         options.push({ id: 'SPECIAL', isSpecial: true, text: data.specialLabel, action: () => resolveVillage(vIndex, 'SPECIAL') });
     }
 
-    if (getIntensityTier(vIndex) === 'C') {
+    if (shouldShowSelfTermination(vIndex)) {
         options.push({
             text: "……ここで、すべてを終わらせる",
             action: () => triggerSelfTermination(vIndex)
@@ -599,11 +597,26 @@ function triggerFateLock(vIndex) {
     }));
 }
 
+/**
+ * 自決の実行：破壊経験の有無で使うテキスト群を切り替える
+ */
 function triggerSelfTermination(vIndex) {
     recordDecisionSpeed(vIndex, 'selfTermination');
-    const d = gameState.despairType || { title: "名もなき絶望", flavor: "" };
-    const scene = selfTerminationTextsByVillage[vIndex] || selfTerminationTextsByVillage[7];
-    updateText(`<b>【${d.title}】</b>\n\n${d.flavor}\n\n${scene}\n\nここで、すべてが止まった。`);
+
+    let title, flavor, scene;
+
+    if (gameState.hasEverDestroyed) {
+        const d = gameState.despairType || { title: "名もなき絶望", flavor: "" };
+        title = d.title;
+        flavor = d.flavor;
+        scene = selfTerminationTextsByVillage[vIndex] || selfTerminationTextsByVillage[7];
+    } else {
+        title = "見て見ぬふりの果て";
+        flavor = "壊すことはしなかった。ただ、気づかないふりを続けることにも、限界があった。";
+        scene = selfTerminationTextsRepairOnly[vIndex] || selfTerminationTextsRepairOnly[7];
+    }
+
+    updateText(`<b>【${title}】</b>\n\n${flavor}\n\n${scene}\n\nここで、すべてが止まった。`);
     setChoices([{ text: "最初からやり直す", action: () => location.reload() }]);
 }
 
@@ -624,9 +637,6 @@ function startVillage(vIndex) {
     renderExploration(vIndex);
 }
 
-/**
- * プロローグ：単眼鏡は「触れて確かめる」形式
- */
 function startStory() {
     updateUI();
     updateText("<b>【プロローグ：勇者の凱旋】</b>\n\n17年前、世界は『魔王』の呪いによって滅びかけていた。\n魔物は大地を喰らい、空は永遠に夜のまま。人々は死を待つだけの存在だった。\n\nそこへ現れたのが、君の父だ。\n父は一人で魔王の城へ乗り込み、死闘の末に魔王の首を撥ねた。\n人々は父を『光の勇者』として称え、世界に17年の平穏が訪れた。");
@@ -665,7 +675,6 @@ function attachMonocleHandler() {
     };
 }
 
-// 全ファイルの読み込みが終わったら物語を開始する
 window.addEventListener('load', () => {
     startStory();
 });
