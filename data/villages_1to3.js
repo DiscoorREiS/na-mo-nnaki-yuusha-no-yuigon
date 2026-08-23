@@ -100,6 +100,13 @@ window.villageData[1] = {
     specialText: "父の理論を応用し、リナの『記憶』だけを単眼鏡へ移した。装置は満たされ、彼女は消えずに済んだ。\n姿は今もそこにある。だが、二人で過ごした記憶の一部は、もう彼女の中にはないようだった。\nそれでも、声は、確かにまだ耳の奥に残っている気がした。",
     specialCondition: (s) => s.hasFoundSecret && isMonocleActive(),
     specialGrantsCompanion: "リナ"
+recruitCandidate: {
+    id: 'recruit_amrita',
+    name: "元傭兵ガレン",
+    joinCondition: (s) => true, // 村1は無条件（話しかければ即加入）
+    joinLabel: "ガレンを旅に誘う",
+    joinText: "「面白そうだな。付き合ってやる」\nガレンは、そう言って剣を担ぎ直した。"
+}
 };
 
 window.villageData[2] = {
