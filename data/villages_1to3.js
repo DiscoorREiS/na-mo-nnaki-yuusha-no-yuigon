@@ -74,18 +74,17 @@ window.villageData[1] = {
                 "風が吹き、木々の葉が揺れる音だけが響いていた。",
                 "特に何も起きないまま、時間だけが過ぎていった。"
             ]
+        },
+        {
+            id: 'recruit_amrita', label: "腕に覚えのある村人と話す", gain: 10, visited: false,
+            firstTexts: [
+                "元傭兵だったという男が、暇そうに剣の手入れをしていた。「平和なのはいいことだが、腕が鈍る」と苦笑していた。"
+            ],
+            loopTexts: [
+                "男は、今日も剣の手入れを続けていた。",
+                "「何かあれば、いつでも声をかけてくれ」と、男は軽く笑った。"
+            ]
         }
-// アムリタ村の仲間候補（villageData[1].topics 配列の最後に追加）
-{
-    id: 'recruit_amrita', label: "腕に覚えのある村人と話す", gain: 10, visited: false,
-    firstTexts: [
-        "元傭兵だったという男が、暇そうに剣の手入れをしていた。「平和なのはいいことだが、腕が鈍る」と苦笑していた。",
-    ],
-    loopTexts: [
-        "男は、今日も剣の手入れを続けていた。",
-        "「何かあれば、いつでも声をかけてくれ」と、男は軽く笑った。"
-    ]
-}
     ],
     secretReveal: "メモには、こう書かれていた。\n『ビーコンの負荷を分散させる予備回路について：物体に人格を共鳴させる理論』\n\n……父は、何を考えていたのだろう。",
     beaconIntro: "装置のハミングが強くなる。リナを装置に繋げば、この静かな日々は続いていく。",
@@ -99,14 +98,14 @@ window.villageData[1] = {
     specialLabel: "【共鳴】リナの記憶だけを移し、消滅を防ぐ",
     specialText: "父の理論を応用し、リナの『記憶』だけを単眼鏡へ移した。装置は満たされ、彼女は消えずに済んだ。\n姿は今もそこにある。だが、二人で過ごした記憶の一部は、もう彼女の中にはないようだった。\nそれでも、声は、確かにまだ耳の奥に残っている気がした。",
     specialCondition: (s) => s.hasFoundSecret && isMonocleActive(),
-    specialGrantsCompanion: "リナ"
-recruitCandidate: {
-    id: 'recruit_amrita',
-    name: "元傭兵ガレン",
-    joinCondition: (s) => true, // 村1は無条件（話しかければ即加入）
-    joinLabel: "ガレンを旅に誘う",
-    joinText: "「面白そうだな。付き合ってやる」\nガレンは、そう言って剣を担ぎ直した。"
-}
+    specialGrantsCompanion: "リナ",
+    recruitCandidate: {
+        id: 'recruit_amrita',
+        name: "元傭兵ガレン",
+        joinCondition: (s) => true,
+        joinLabel: "ガレンを旅に誘う",
+        joinText: "「面白そうだな。付き合ってやる」\nガレンは、そう言って剣を担ぎ直した。"
+    }
 };
 
 window.villageData[2] = {
@@ -174,6 +173,16 @@ window.villageData[2] = {
         {
             id: 'rumor', label: "旅人から噂話を聞く", gain: 10, visited: false,
             isRumorTopic: true
+        },
+        {
+            id: 'recruit_zankyou', label: "腕に覚えのある村人と話す", gain: 10, visited: false,
+            firstTexts: [
+                "元衛兵だったという女が、退屈そうに壁にもたれていた。「歌ばかりの街には、飽き飽きしていたところだ」と笑った。"
+            ],
+            loopTexts: [
+                "女は、今日も暇そうに過ごしていた。",
+                "「早く街を出る日を待っているのさ」と、女はぼやいた。"
+            ]
         }
     ],
     secretReveal: "楽譜の隅に、小さな走り書きがあった。\n『音を止めるな。止まれば、皆が思い出してしまう』\n\n思い出す？ 何を――",
@@ -192,7 +201,14 @@ window.villageData[2] = {
     specialLabel: "【介入】司祭を消さず、スピーカーの出力だけを調整する",
     specialText: "司祭を捧げる代わりに、スピーカーの出力そのものに手を加えた。歌は流れ続け、司祭も、そこに変わらず在り続けている。\nだが心なしか、人々の表情が、少しだけ変わって見えた気がした。",
     specialCondition: (s) => s.hasFoundSecret && isMonocleActive(),
-    specialGrantsCompanion: null
+    specialGrantsCompanion: null,
+    recruitCandidate: {
+        id: 'recruit_zankyou',
+        name: "元衛兵ミラ",
+        joinCondition: (s) => s.hasFoundSecret,
+        joinLabel: "ミラを旅に誘う",
+        joinText: "「ようやくか。付き合ってやるよ」\nミラは、そう言って軽く肩を回した。"
+    }
 };
 
 window.villageData[3] = {
@@ -259,6 +275,16 @@ window.villageData[3] = {
         {
             id: 'rumor', label: "旅人から噂話を聞く", gain: 10, visited: false,
             isRumorTopic: true
+        },
+        {
+            id: 'recruit_kiri', label: "腕に覚えのある村人と話す", gain: 10, visited: false,
+            firstTexts: [
+                "元漁師だという大柄な男が、銛を手入れしていた。「これでもかつては、荒くれ者と呼ばれたもんさ」と笑った。"
+            ],
+            loopTexts: [
+                "男は、今日も銛を磨いていた。",
+                "「霧の先が気になるなら、俺を連れて行くといい」と、男は自信ありげに言った。"
+            ]
         }
     ],
     secretReveal: "羅針盤の裏に、小さな文字が刻まれていた。\n『どちらを向いても、同じ場所に戻ってしまう』\n\n道具の故障だろうか。それとも――",
@@ -277,7 +303,14 @@ window.villageData[3] = {
     specialLabel: "【共鳴】羅針盤に、二人の記憶を移し、消滅を防ぐ",
     specialText: "羅針盤の針に、そっと手を触れた。二人の記憶の一部が、金属の中へと移っていくのを感じた。\n夫婦は、変わらずそこにいる。だが、何かを一つ、確かに手放したようだった。何が起きたのか、二人自身も気づいていないようだった。",
     specialCondition: (s) => s.hasFoundSecret && isMonocleActive(),
-    specialGrantsCompanion: null
+    specialGrantsCompanion: null,
+    recruitCandidate: {
+        id: 'recruit_kiri',
+        name: "元漁師ドラン",
+        joinCondition: (s) => s.hasFoundSecret && (isMonocleActive() ? s.doucho >= 40 : s.investigation >= 40),
+        joinLabel: "ドランを旅に誘う",
+        joinText: "「よし、決まりだ」\nドランは、銛を担いで頷いた。"
+    }
 };
 
 window.MAX_IMPLEMENTED_VILLAGE = Math.max(window.MAX_IMPLEMENTED_VILLAGE || 0, 3);
