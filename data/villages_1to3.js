@@ -2,7 +2,6 @@
  * ============================================================
  * villages_1to3.js
  * 第1〜3の村（アムリタ村・残響の街・霧の港町）のデータ。
- * この村の内容だけを直したいときは、このファイルを丸ごと差し替えればよい。
  * ============================================================
  */
 
@@ -60,6 +59,8 @@ window.villageData[1] = {
         },
         {
             id: 'plaza', label: "単眼鏡で広場を覗く", gain: 15, visited: false,
+            monocleOnly: true,
+            noMonocleLabel: "広場の様子を見る",
             firstTexts: [
                 "広場の噴水を眺めていると、子どもたちの笑い声が響いていた。ふと、蹴られたボールの跳ね方が、少しだけ気になった。",
                 "空を見上げると、雲がゆっくりと流れていた。よく晴れた、穏やかな午後だった。",
@@ -73,16 +74,25 @@ window.villageData[1] = {
                 "子どもたちの遊ぶ声が、今日も遠くから聞こえていた。",
                 "風が吹き、木々の葉が揺れる音だけが響いていた。",
                 "特に何も起きないまま、時間だけが過ぎていった。"
+            ],
+            noMonocleFirstTexts: [
+                "広場では子どもたちが遊んでいた。よく晴れた、穏やかな午後だった。",
+                "噴水のそばで、村人たちがのんびりと過ごしていた。"
+            ],
+            noMonocleLoopTexts: [
+                "広場はいつもと変わらない、穏やかな様子だった。",
+                "子どもたちの遊ぶ声が、今日も遠くから聞こえていた。",
+                "特に何も起きないまま、時間だけが過ぎていった。"
             ]
         },
         {
-            id: 'recruit_amrita', label: "腕に覚えのある村人と話す", gain: 10, visited: false,
+            id: 'recruit_amrita', label: "ガレンと話す", gain: 10, visited: false,
             firstTexts: [
-                "元傭兵だったという男が、暇そうに剣の手入れをしていた。「平和なのはいいことだが、腕が鈍る」と苦笑していた。"
+                "元傭兵だというガレンが、暇そうに剣の手入れをしていた。「平和なのはいいことだが、腕が鈍る」と苦笑していた。"
             ],
             loopTexts: [
-                "男は、今日も剣の手入れを続けていた。",
-                "「何かあれば、いつでも声をかけてくれ」と、男は軽く笑った。"
+                "ガレンは、今日も剣の手入れを続けていた。",
+                "「何かあれば、いつでも声をかけてくれ」と、ガレンは軽く笑った。"
             ]
         }
     ],
@@ -97,7 +107,6 @@ window.villageData[1] = {
     destroyEpilogue: "もう何も語らない。ただ、彼女がいた場所に、小さな影だけが残っている。",
     specialLabel: "【共鳴】リナの記憶だけを移し、消滅を防ぐ",
     specialText: "父の理論を応用し、リナの『記憶』だけを単眼鏡へ移した。装置は満たされ、彼女は消えずに済んだ。\n姿は今もそこにある。だが、二人で過ごした記憶の一部は、もう彼女の中にはないようだった。\nそれでも、声は、確かにまだ耳の奥に残っている気がした。",
-    specialCondition: (s) => s.hasFoundSecret && isMonocleActive(),
     specialGrantsCompanion: "リナ",
     recruitCandidate: {
         id: 'recruit_amrita',
@@ -175,13 +184,13 @@ window.villageData[2] = {
             isRumorTopic: true
         },
         {
-            id: 'recruit_zankyou', label: "腕に覚えのある村人と話す", gain: 10, visited: false,
+            id: 'recruit_zankyou', label: "ミラと話す", gain: 10, visited: false,
             firstTexts: [
-                "元衛兵だったという女が、退屈そうに壁にもたれていた。「歌ばかりの街には、飽き飽きしていたところだ」と笑った。"
+                "元衛兵だというミラが、退屈そうに壁にもたれていた。「歌ばかりの街には、飽き飽きしていたところだ」と笑った。"
             ],
             loopTexts: [
-                "女は、今日も暇そうに過ごしていた。",
-                "「早く街を出る日を待っているのさ」と、女はぼやいた。"
+                "ミラは、今日も暇そうに過ごしていた。",
+                "「早く街を出る日を待っているのさ」と、ミラはぼやいた。"
             ]
         }
     ],
@@ -200,7 +209,6 @@ window.villageData[2] = {
     destroyEpilogue: "楽譜だけが、瓦礫の中に落ちていた。誰も、それを拾おうとはしなかった。",
     specialLabel: "【介入】司祭を消さず、スピーカーの出力だけを調整する",
     specialText: "司祭を捧げる代わりに、スピーカーの出力そのものに手を加えた。歌は流れ続け、司祭も、そこに変わらず在り続けている。\nだが心なしか、人々の表情が、少しだけ変わって見えた気がした。",
-    specialCondition: (s) => s.hasFoundSecret && isMonocleActive(),
     specialGrantsCompanion: null,
     recruitCandidate: {
         id: 'recruit_zankyou',
@@ -257,6 +265,8 @@ window.villageData[3] = {
         },
         {
             id: 'fog', label: "単眼鏡で霧の先を覗く", gain: 15, visited: false,
+            monocleOnly: true,
+            noMonocleLabel: "霧の先を眺める",
             firstTexts: [
                 "単眼鏡越しに見ても、霧の奥はやはり白く霞んでいるだけだった。",
                 "波の音に耳を澄ませてみる。寄せては返す音が、やけに規則正しく聞こえた。",
@@ -270,6 +280,15 @@ window.villageData[3] = {
                 "波打ち際に、貝殻がいくつか転がっていた。",
                 "遠くの汽笛が、いつもと同じ調子で響いた。",
                 "特に何も起きないまま、時間だけが過ぎていった。"
+            ],
+            noMonocleFirstTexts: [
+                "霧の先は、目を凝らしても白く霞んで見えなかった。",
+                "波の音を聞きながら、しばらく海を眺めていた。"
+            ],
+            noMonocleLoopTexts: [
+                "霧は、今日も変わらず立ち込めていた。",
+                "潮風に当たりながら、しばらく海を眺めていた。",
+                "特に何も起きないまま、時間だけが過ぎていった。"
             ]
         },
         {
@@ -277,13 +296,13 @@ window.villageData[3] = {
             isRumorTopic: true
         },
         {
-            id: 'recruit_kiri', label: "腕に覚えのある村人と話す", gain: 10, visited: false,
+            id: 'recruit_kiri', label: "ドランと話す", gain: 10, visited: false,
             firstTexts: [
-                "元漁師だという大柄な男が、銛を手入れしていた。「これでもかつては、荒くれ者と呼ばれたもんさ」と笑った。"
+                "元漁師だという大柄なドランが、銛を手入れしていた。「これでもかつては、荒くれ者と呼ばれたもんさ」と笑った。"
             ],
             loopTexts: [
-                "男は、今日も銛を磨いていた。",
-                "「霧の先が気になるなら、俺を連れて行くといい」と、男は自信ありげに言った。"
+                "ドランは、今日も銛を磨いていた。",
+                "「霧の先が気になるなら、俺を連れて行くといい」と、ドランは自信ありげに言った。"
             ]
         }
     ],
@@ -302,7 +321,6 @@ window.villageData[3] = {
     destroyEpilogue: "羅針盤だけが、波打ち際に転がっていた。針は、もう動いていなかった。",
     specialLabel: "【共鳴】羅針盤に、二人の記憶を移し、消滅を防ぐ",
     specialText: "羅針盤の針に、そっと手を触れた。二人の記憶の一部が、金属の中へと移っていくのを感じた。\n夫婦は、変わらずそこにいる。だが、何かを一つ、確かに手放したようだった。何が起きたのか、二人自身も気づいていないようだった。",
-    specialCondition: (s) => s.hasFoundSecret && isMonocleActive(),
     specialGrantsCompanion: null,
     recruitCandidate: {
         id: 'recruit_kiri',
