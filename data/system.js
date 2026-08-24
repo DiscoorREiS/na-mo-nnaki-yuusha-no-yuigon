@@ -9,7 +9,6 @@
 window.onerror = function(message, source, lineno, colno, error) {
     const box = document.getElementById('text-box');
     if (box) {
-        // sourceにはエラーが起きたファイルのURLが入っている。ファイル名だけ抜き出して表示する。
         const fileName = source ? source.split('/').pop() : "不明なファイル";
         box.innerHTML = `<div class="error-box"><b>【システムエラーが発生しました】</b><br>以下の内容をそのまま開発者に伝えてください。<br><br>ファイル: ${fileName}<br>Message: ${message}<br>Line: ${lineno}, Col: ${colno}</div>`;
     }
@@ -27,11 +26,12 @@ const gameState = {
     totalDoucho: 0,
     investigation: 0,
     worldSaturation: 100,
-    companions: [],       // 表示用の名前リスト（既存互換）
-    fighters: [],          // 戦闘用の詳細データ { name, level, exp, condition }
+    companions: [],
+    fighters: [],
     victims: [],
     villageHistory: [],
-    hasFoundSecret: false,
+    hasFoundSecret: false,          // その村の秘密を見つけたか（村ごとにリセット）
+    hasUnlockedResonance: false,    // アムリタ村でメモを見つけたか（ゲーム全体で固定。これが共鳴・介入の唯一の条件）
     monocleAbandoned: false,
     hasMonocle: false,
     firstDestructionVillage: null,
@@ -78,8 +78,14 @@ function pickByEntryLevel(variants) {
     return "";
 }
 
+// 単眼鏡は「違和感に気づけるかどうか」だけを左右する。共鳴の可否とは無関係。
 function isMonocleActive() {
     return gameState.hasMonocle && !gameState.monocleAbandoned;
+}
+
+// 共鳴・介入が使えるかどうかは、これ一つだけで判定する（村ごとのhasFoundSecretは無関係）
+function canUseResonance() {
+    return gameState.hasUnlockedResonance;
 }
 
 function getDespairName(n) {
@@ -216,9 +222,19 @@ function shouldShowSelfTermination(vIndex) {
  * ============================================================
  */
 
-function addCompanionFighter(name) {
+// 加入時の村番号に応じて初期レベルを底上げする（村5加入ならLv3スタート、など）
+function calcInitialLevel(vIndex) {
+    return 1 + Math.floor((vIndex - 1) / 2);
+}
+
+function addCompanionFighter(name, vIndex) {
     if (!gameState.fighters.some(f => f.name === name)) {
-        gameState.fighters.push({ name: name, level: 1, exp: 0, condition: 'safe' });
+        gameState.fighters.push({
+            name: name,
+            level: calcInitialLevel(vIndex),
+            exp: 0,
+            condition: 'safe'
+        });
     }
     if (!gameState.companions.includes(name)) {
         gameState.companions.push(name);
@@ -362,7 +378,7 @@ function updateUI() {
         listEl.appendChild(li);
     });
 
-    console.log(`[状態] 村:${gameState.currentVillageIndex} 彩度:${gameState.worldSaturation}% 同調:${gameState.doucho} 調査度:${gameState.investigation} 累積同調:${gameState.totalDoucho} 破壊回数:${gameState.destroyCount} 修理回数:${gameState.repairedCount} 仲間:${JSON.stringify(gameState.fighters.map(f => f.name + ':' + f.condition))}`);
+    console.log(`[状態] 村:${gameState.currentVillageIndex} 彩度:${gameState.worldSaturation}% 同調:${gameState.doucho} 調査度:${gameState.investigation} 累積同調:${gameState.totalDoucho} 共鳴解禁:${gameState.hasUnlockedResonance} 破壊回数:${gameState.destroyCount} 修理回数:${gameState.repairedCount} 仲間:${JSON.stringify(gameState.fighters.map(f => f.name + ':Lv' + f.level + ':' + f.condition))}`);
 }
 
 function showEpilogue(index) {
@@ -390,9 +406,17 @@ function attachSecretHandlers() {
     });
 }
 
+/**
+ * 秘密の発見。第1村（アムリタ村）でのみ、hasUnlockedResonanceを立てる。
+ * これが以降すべての村の共鳴・介入を解禁する唯一の条件になる。
+ */
 function revealSecret(secretId) {
     if (gameState.hasFoundSecret) return;
     gameState.hasFoundSecret = true;
+
+    if (gameState.currentVillageIndex === 1) {
+        gameState.hasUnlockedResonance = true;
+    }
 
     if (isMonocleActive()) {
         gameState.doucho += 15;
@@ -464,6 +488,11 @@ function getRumorText(vIndex) {
     return pickRandom(pool)(prevName);
 }
 
+/**
+ * トピックのテキスト決定。
+ * ・単眼鏡なしの場合、monocleOnly指定のトピックは代替テキスト（noMonocleFirstTexts等）を使う
+ * ・秘密の発見は単眼鏡の有無に関係なく可能
+ */
 function getTopicText(topic, vIndex) {
     if (topic.isRumorTopic) {
         if (!topic.visited) {
@@ -478,6 +507,10 @@ function getTopicText(topic, vIndex) {
         return getRumorText(vIndex);
     }
 
+    const useMonocleVersion = isMonocleActive() || !topic.monocleOnly;
+    const firstPool = (!isMonocleActive() && topic.noMonocleFirstTexts) ? topic.noMonocleFirstTexts : topic.firstTexts;
+    const loopPool = (!isMonocleActive() && topic.noMonocleLoopTexts) ? topic.noMonocleLoopTexts : topic.loopTexts;
+
     if (!topic.visited) {
         topic.visited = true;
         if (isMonocleActive()) {
@@ -486,7 +519,7 @@ function getTopicText(topic, vIndex) {
         } else {
             gameState.investigation += topic.gain;
         }
-        return pickRandom(topic.firstTexts);
+        return pickRandom(firstPool);
     }
 
     const encroachment = maybeGetEncroachmentText();
@@ -500,20 +533,25 @@ function getTopicText(topic, vIndex) {
         return topic.withMonocleExtra;
     }
 
-    return pickRandom(topic.loopTexts);
+    return pickRandom(loopPool);
 }
 
 /**
- * ============================================================
- * 探索フェーズ
- * ============================================================
+ * トピックのラベル表示。単眼鏡なしの場合、monocleOnlyトピックは noMonocleLabel を使う。
  */
+function getTopicLabel(topic) {
+    if (!isMonocleActive() && topic.monocleOnly && topic.noMonocleLabel) {
+        return topic.noMonocleLabel;
+    }
+    return topic.label;
+}
+
 function renderExploration(vIndex) {
     updateUI();
     const data = villageData[vIndex];
 
     const choices = data.topics.map(topic => ({
-        text: topic.label,
+        text: getTopicLabel(topic),
         action: () => {
             const text = getTopicText(topic, vIndex);
             updateUI();
@@ -549,14 +587,14 @@ function renderExploration(vIndex) {
                 text: rc.joinLabel,
                 isSpecial: true,
                 action: () => {
-                    addCompanionFighter(rc.name);
+                    addCompanionFighter(rc.name, vIndex);
                     updateText(rc.joinText);
                     setChoices([{ text: "探索を続ける", action: () => renderExploration(vIndex) }]);
                 }
             });
         } else if (alreadyJoined) {
             choices.push({
-                text: `${rc.name}と語らう（経験を積む）`,
+                text: `${rc.name}と話す`,
                 action: () => {
                     gainCompanionExp(rc.name, 10);
                     updateUI();
@@ -601,7 +639,8 @@ function renderBeacon(vIndex) {
         { id: 'DESTROY', isMajor: true, text: "【破壊】装置を壊す", action: () => resolveVillage(vIndex, 'DESTROY') }
     ];
 
-    if (data.specialCondition(gameState)) {
+    // 共鳴・介入の解禁条件は canUseResonance() のみ（村ごとのhasFoundSecretは見ない）
+    if (canUseResonance()) {
         options.push({ id: 'SPECIAL', isSpecial: true, text: data.specialLabel, action: () => resolveVillage(vIndex, 'SPECIAL') });
     }
 
@@ -662,7 +701,7 @@ function resolveVillage(vIndex, type) {
         gameState.worldSaturation -= 5;
         gameState.repairedCount++;
         if (data.specialGrantsCompanion) {
-            addCompanionFighter(data.specialGrantsCompanion);
+            addCompanionFighter(data.specialGrantsCompanion, vIndex);
         }
         updateUI();
         updateText(data.specialText);
