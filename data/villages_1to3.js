@@ -86,13 +86,13 @@ window.villageData[1] = {
             ]
         },
         {
-            id: 'recruit_amrita', label: "ガレンと話す", gain: 10, visited: false,
+            id: 'recruit_amrita', label: "元傭兵と話す", gain: 10, visited: false,
             firstTexts: [
-                "元傭兵だというガレンが、暇そうに剣の手入れをしていた。「平和なのはいいことだが、腕が鈍る」と苦笑していた。"
+                "元傭兵だという男が、暇そうに剣の手入れをしていた。「平和なのはいいことだが、腕が鈍る」と苦笑していた。名乗りはしなかった。"
             ],
             loopTexts: [
-                "ガレンは、今日も剣の手入れを続けていた。",
-                "「何かあれば、いつでも声をかけてくれ」と、ガレンは軽く笑った。"
+                "男は、今日も剣の手入れを続けていた。",
+                "「何かあれば、いつでも声をかけてくれ」と、男は軽く笑った。"
             ]
         }
     ],
@@ -112,8 +112,9 @@ window.villageData[1] = {
         id: 'recruit_amrita',
         name: "元傭兵ガレン",
         joinCondition: (s) => true,
-        joinLabel: "ガレンを旅に誘う",
-        joinText: "「面白そうだな。付き合ってやる」\nガレンは、そう言って剣を担ぎ直した。"
+        joinLabel: "旅に誘う",
+        joinText: "「面白そうだな。付き合ってやる。ガレンだ」\n男は、そう名乗って剣を担ぎ直した。",
+        talkLabelAfterJoin: "ガレンと話す"
     }
 };
 
@@ -184,13 +185,13 @@ window.villageData[2] = {
             isRumorTopic: true
         },
         {
-            id: 'recruit_zankyou', label: "ミラと話す", gain: 10, visited: false,
+            id: 'recruit_zankyou', label: "壁にもたれる女と話す", gain: 10, visited: false,
             firstTexts: [
-                "元衛兵だというミラが、退屈そうに壁にもたれていた。「歌ばかりの街には、飽き飽きしていたところだ」と笑った。"
+                "元衛兵だという女が、退屈そうに壁にもたれていた。「歌ばかりの街には、飽き飽きしていたところだ」と笑った。名は、まだ聞いていない。"
             ],
             loopTexts: [
-                "ミラは、今日も暇そうに過ごしていた。",
-                "「早く街を出る日を待っているのさ」と、ミラはぼやいた。"
+                "女は、今日も暇そうに過ごしていた。",
+                "「早く街を出る日を待っているのさ」と、女はぼやいた。"
             ]
         }
     ],
@@ -214,8 +215,9 @@ window.villageData[2] = {
         id: 'recruit_zankyou',
         name: "元衛兵ミラ",
         joinCondition: (s) => s.hasFoundSecret,
-        joinLabel: "ミラを旅に誘う",
-        joinText: "「ようやくか。付き合ってやるよ」\nミラは、そう言って軽く肩を回した。"
+        joinLabel: "旅に誘う",
+        joinText: "「ようやくか。付き合ってやるよ。ミラだ」\n女は、そう名乗って軽く肩を回した。",
+        talkLabelAfterJoin: "ミラと話す"
     }
 };
 
@@ -296,13 +298,13 @@ window.villageData[3] = {
             isRumorTopic: true
         },
         {
-            id: 'recruit_kiri', label: "ドランと話す", gain: 10, visited: false,
+            id: 'recruit_kiri', label: "銛を持つ大柄な男と話す", gain: 10, visited: false,
             firstTexts: [
-                "元漁師だという大柄なドランが、銛を手入れしていた。「これでもかつては、荒くれ者と呼ばれたもんさ」と笑った。"
+                "元漁師だという大柄な男が、銛を手入れしていた。「これでもかつては、荒くれ者と呼ばれたもんさ」と笑った。名乗りはしなかった。"
             ],
             loopTexts: [
-                "ドランは、今日も銛を磨いていた。",
-                "「霧の先が気になるなら、俺を連れて行くといい」と、ドランは自信ありげに言った。"
+                "男は、今日も銛を磨いていた。",
+                "「霧の先が気になるなら、俺を連れて行くといい」と、男は自信ありげに言った。"
             ]
         }
     ],
@@ -326,8 +328,9 @@ window.villageData[3] = {
         id: 'recruit_kiri',
         name: "元漁師ドラン",
         joinCondition: (s) => s.hasFoundSecret && (isMonocleActive() ? s.doucho >= 40 : s.investigation >= 40),
-        joinLabel: "ドランを旅に誘う",
-        joinText: "「よし、決まりだ」\nドランは、銛を担いで頷いた。"
+        joinLabel: "旅に誘う",
+        joinText: "「よし、決まりだ。ドランだ」\n男は、銛を担いでそう名乗った。",
+        talkLabelAfterJoin: "ドランと話す"
     }
 };
 
