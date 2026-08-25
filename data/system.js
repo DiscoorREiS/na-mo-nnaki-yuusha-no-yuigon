@@ -550,14 +550,72 @@ function renderExploration(vIndex) {
     updateUI();
     const data = villageData[vIndex];
 
-    const choices = data.topics.map(topic => ({
-        text: getTopicLabel(topic),
-        action: () => {
-            const text = getTopicText(topic, vIndex);
-            updateUI();
-            updateText(text);
-            renderExploration(vIndex);
+    const choices = data.topics.map(topic => {
+        // 仲間に加入済みの場合、探索トピックのラベルを本名入りのものに差し替える
+        let label = getTopicLabel(topic);
+        if (data.recruitCandidate && data.recruitCandidate.id === topic.id) {
+            const joined = gameState.fighters.some(f => f.name === data.recruitCandidate.name);
+            if (joined && data.recruitCandidate.talkLabelAfterJoin) {
+                label = data.recruitCandidate.talkLabelAfterJoin;
+            }
         }
+        return {
+            text: label,
+            action: () => {
+                const text = getTopicText(topic, vIndex);
+                updateUI();
+                updateText(text);
+                renderExploration(vIndex);
+            }
+        };
+    });
+
+    data.topics.forEach(topic => {
+        if (topic.deepChoice && gameState.doucho >= topic.deepChoice.threshold && topic.visited) {
+            choices.push({
+                text: topic.deepChoice.label,
+                isSpecial: true,
+                action: () => {
+                    gameState.worldSaturation = Math.max(0, gameState.worldSaturation - topic.deepChoice.saturationCost);
+                    updateUI();
+                    updateText(topic.deepChoice.text);
+                    topic.deepChoice = null;
+                    renderExploration(vIndex);
+                }
+            });
+        }
+    });
+
+    // 仲間候補の勧誘・レベルアップ会話（勧誘ボタンのみ。会話自体は探索トピック側に統合済み）
+    if (data.recruitCandidate) {
+        const rc = data.recruitCandidate;
+        const alreadyJoined = gameState.fighters.some(f => f.name === rc.name);
+        const recruitTopic = data.topics.find(t => t.id === rc.id);
+
+        if (!alreadyJoined && recruitTopic && recruitTopic.visited && rc.joinCondition(gameState)) {
+            choices.push({
+                text: rc.joinLabel,
+                isSpecial: true,
+                action: () => {
+                    addCompanionFighter(rc.name, vIndex);
+                    updateText(rc.joinText);
+                    setChoices([{ text: "探索を続ける", action: () => renderExploration(vIndex) }]);
+                }
+            });
+        }
+    }
+
+    if (gameState.totalDoucho >= 220 && isMonocleActive()) {
+        choices.push({
+            text: "……もう、これ以上は見たくない",
+            isSpecial: true,
+            action: () => abandonMonocle(vIndex)
+        });
+    }
+
+    choices.push({ text: "ビーコンへ向かう", action: () => renderBeacon(vIndex) });
+    setChoices(choices);
+}
     }));
 
     data.topics.forEach(topic => {
