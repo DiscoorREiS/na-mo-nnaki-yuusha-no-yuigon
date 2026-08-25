@@ -616,64 +616,6 @@ function renderExploration(vIndex) {
     choices.push({ text: "ビーコンへ向かう", action: () => renderBeacon(vIndex) });
     setChoices(choices);
 }
-    }));
-
-    data.topics.forEach(topic => {
-        if (topic.deepChoice && gameState.doucho >= topic.deepChoice.threshold && topic.visited) {
-            choices.push({
-                text: topic.deepChoice.label,
-                isSpecial: true,
-                action: () => {
-                    gameState.worldSaturation = Math.max(0, gameState.worldSaturation - topic.deepChoice.saturationCost);
-                    updateUI();
-                    updateText(topic.deepChoice.text);
-                    topic.deepChoice = null;
-                    renderExploration(vIndex);
-                }
-            });
-        }
-    });
-
-    // 仲間候補の勧誘・レベルアップ会話
-    if (data.recruitCandidate) {
-        const rc = data.recruitCandidate;
-        const alreadyJoined = gameState.fighters.some(f => f.name === rc.name);
-        const recruitTopic = data.topics.find(t => t.id === rc.id);
-
-        if (!alreadyJoined && recruitTopic && recruitTopic.visited && rc.joinCondition(gameState)) {
-            choices.push({
-                text: rc.joinLabel,
-                isSpecial: true,
-                action: () => {
-                    addCompanionFighter(rc.name, vIndex);
-                    updateText(rc.joinText);
-                    setChoices([{ text: "探索を続ける", action: () => renderExploration(vIndex) }]);
-                }
-            });
-        } else if (alreadyJoined) {
-            choices.push({
-                text: `${rc.name}と話す`,
-                action: () => {
-                    gainCompanionExp(rc.name, 10);
-                    updateUI();
-                    updateText(`${rc.name}と、旅の中で少し言葉を交わした。何気ないやり取りが、確かな絆になっていく気がした。`);
-                    renderExploration(vIndex);
-                }
-            });
-        }
-    }
-
-    if (gameState.totalDoucho >= 220 && isMonocleActive()) {
-        choices.push({
-            text: "……もう、これ以上は見たくない",
-            isSpecial: true,
-            action: () => abandonMonocle(vIndex)
-        });
-    }
-
-    choices.push({ text: "ビーコンへ向かう", action: () => renderBeacon(vIndex) });
-    setChoices(choices);
-}
 
 function abandonMonocle(vIndex) {
     gameState.monocleAbandoned = true;
